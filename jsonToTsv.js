@@ -1,8 +1,6 @@
-// csvToJson.js
-// the script creates a json file from a csv or tsv file
-// auto detects row end character(s), auto detects column separator (comma or tab)
+// jsonToTsv.js
+// the script creates a tab separated file from a json file
 // author: Bo Ericsson, bo@boe.net, 2016, public domain
-// uses code by Curran Kelleher (see attrib below)
 'use strict';
 
 // dependencies
@@ -25,35 +23,40 @@ var input;
 try {
   input = fs.readFileSync(inputFile, 'utf8');
   input = JSON.parse(input);
-}
-catch(e) {
-  console.log("could not open input file " + inputFile + ", reason: " + e);
+} catch(e) {
+  console.log("could not open or parse input file " + inputFile + ", reason: " + e);
   return;
 }
 
-// get columns
+// create output array
+var out = [];
+
+// get columns from props of first array item
 var columns = Object.keys(input[0])
 
-var out = [];
-// output column header
+// output column header with tab separator
 out.push(columns.join("\t"))
 
+// output data rows
 input.forEach(function(row) {
-  //console.log("--", row)
   var items = [];
-  columns.forEach(function(column) {
-    items.push(row[column])
-  })
-  items = items.join("\t");
+  
+  // get the data elements and add to items array
+  columns.forEach(function(column) { items.push(row[column]) })
+  
+  // create output string with data items separated by a tab, then add the string
+  items = items.join("\t"); 
   out.push(items)
 })
 
+// join output array items with newline, then redefine output
 out = out.join("\n");
 
+// write the file
 try {
   fs.writeFileSync(outputFile, out, "utf8");
   console.log("wrote file: " + outputFile);
 } catch(e) {
-  console.log("could not write to file " + outputFile + ", reason: " + e)
+  console.log("could not write file " + outputFile + ", reason: " + e)
 }
 
